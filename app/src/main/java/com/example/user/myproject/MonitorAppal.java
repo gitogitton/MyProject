@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 
 public class MonitorAppal extends AppCompatActivity
         implements ViewPager.OnPageChangeListener, PageFragment.OnFragmentInteractionListener {
@@ -17,50 +19,65 @@ public class MonitorAppal extends AppCompatActivity
 
     private TabLayout mTabLayout;
     private  ViewPager mViewPager;
-    private FragmentPagerAdapter mAdapter;
+    public ListView mListView;
+//    private ArrayAdapter<String> mAdapterOfList = new ArrayAdapter<String>();
+    public ListAdapter mListAdapter;
+    private String mProcess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(CLASS_NAME, "onCreate() start");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_moniter_appl);
+        setContentView(R.layout.activity_monitor_appl);
+
+        mTabLayout = findViewById(R.id.tab);
+        mViewPager = findViewById(R.id.view_pager);
 
         //toolbar setting
         setToolbar();
         //set tab
         setTab();
-
+        //get listed data.
+        getList();
+        //show data to listView
+        showListedData();
     }
     private void setToolbar() {
+        Log.d(CLASS_NAME, "setToolbar() start");
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar); //ToolbarはAPI21からのサポート。API19だからActionBarをサポートする。
+    }
+    private void getList() {
+        Log.d(CLASS_NAME, "getList() start");
+        //getListInfo(); //setする情報を取得 (set mProcess)
+    }
+    private void showListedData() {
+        Log.d(CLASS_NAME, "showListedData() start");
     }
     private void setTab() {
         Log.d(CLASS_NAME, "setTab() start");
 
-        mTabLayout = findViewById(R.id.tab);
-        mViewPager = findViewById(R.id.view_pager);
+        final String[] pageTitle = {"Running Process", "Installed Application"};//, "Setting"}; //タブページのタイトル
 
-        final String[] pageTitle = {"Tab 1", "Tab 2"};//, "Setting"}; //タブページのタイトル
-
-        mAdapter = new FragmentPagerAdapter( getSupportFragmentManager() ) {
+        FragmentPagerAdapter mAdapterOfPager = new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public int getCount() {
-                Log.d(CLASS_NAME, "FragmentPagerAdapter.getCount() start");
+//                Log.d(CLASS_NAME, "FragmentPagerAdapter.getCount() start");
                 return pageTitle.length;
             }
+
             @Override
             public Fragment getItem(int position) {
-                Log.d(CLASS_NAME, "FragmentPagerAdapter.getItem() start. position="+position);
+                Log.d(CLASS_NAME, "FragmentPagerAdapter.getItem() start. position=" + position);
                 return PageFragment.newInstance(position);
             }
         };
 
-        mViewPager.setAdapter(mAdapter);
+        mViewPager.setAdapter(mAdapterOfPager);
         mViewPager.addOnPageChangeListener(this); //ページ切り替え、ページスクロール時に呼ばれるリスナー登録
         mTabLayout.setupWithViewPager(mViewPager); //TabLayoutとViewPagerを連動させる
 
-        mTabLayout.getTabAt(0).setText(pageTitle[0]);  //タブのタイトル設定
+        mTabLayout.getTabAt(0).setText(pageTitle[0]); //タブのタイトル設定
         mTabLayout.getTabAt(1).setText(pageTitle[1]);  //タブのタイトル設定
     }
 
