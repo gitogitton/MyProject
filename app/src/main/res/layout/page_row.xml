@@ -6,14 +6,14 @@
     android:layout_height="match_parent">
 
 
-    <!--        android:drawableLeft="@mipmap/ic_launcher"-->
     <TextView
         android:id="@+id/list_row_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="んごん？"
+        android:text="@string/test_string"
         android:textSize="30sp"
         android:drawablePadding="5dp"
+        android:drawableStart="@mipmap/ic_launcher"
         tools:layout_editor_absoluteX="51dp"
         tools:layout_editor_absoluteY="164dp" />
 

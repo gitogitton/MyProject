@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -69,7 +70,7 @@ public class PageFragment extends Fragment {
         Log.d(CLASS_NAME, "onCreate() start");
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            int mParam1 = getArguments().getInt(ARG_PARAM1);
+            int param1 = getArguments().getInt(ARG_PARAM1);
         }
     }
 
@@ -105,10 +106,12 @@ public class PageFragment extends Fragment {
                                 Log.d(CLASS_NAME, "packageNmae : " + packageName);
                                 textView.setText(packageName);
                                 //set icon.
-                                AtomicReference<Drawable> icon = new AtomicReference<Drawable>();
+                                AtomicReference<Drawable> icon = new AtomicReference<>();
                                 icon.set(applicationIcon);
                                 //ICONの表示位置を設定 (引数：座標 x, 座標 y, 幅, 高さ)
-                                icon.get().setBounds(0, 0, icon.get().getIntrinsicWidth(), icon.get().getIntrinsicHeight());
+                                Log.d(CLASS_NAME, "size of icon (w/h) : "+icon.get().getIntrinsicWidth()+" / "+icon.get().getIntrinsicHeight());
+//iconサイズそのままだから・・・                                icon.get().setBounds(0, 0, icon.get().getIntrinsicWidth(), icon.get().getIntrinsicHeight());
+                                icon.get().setBounds(0, 0, 72, 72);
                                 //TextViewにアイコンセット（四辺(left, top, right, bottom)に対して別個にアイコンを描画できる）
                                 textView.setCompoundDrawables(icon.get(), null, null, null);
                                 //add new data to array.
@@ -138,7 +141,7 @@ public class PageFragment extends Fragment {
         mListViewAdapter.notifyDataSetChanged(); //listViewに通知
     }
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(CLASS_NAME, "onCreateView() start");
         // Inflate the layout for this fragment

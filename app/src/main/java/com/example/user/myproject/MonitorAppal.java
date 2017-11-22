@@ -9,8 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 
 public class MonitorAppal extends AppCompatActivity
         implements ViewPager.OnPageChangeListener, PageFragment.OnFragmentInteractionListener {
@@ -19,10 +17,6 @@ public class MonitorAppal extends AppCompatActivity
 
     private TabLayout mTabLayout;
     private  ViewPager mViewPager;
-    public ListView mListView;
-//    private ArrayAdapter<String> mAdapterOfList = new ArrayAdapter<String>();
-    public ListAdapter mListAdapter;
-    private String mProcess;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
