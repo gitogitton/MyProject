@@ -39,11 +39,10 @@ public class PageFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-
-    private OnFragmentInteractionListener mListener;
-
     private final String CLASS_NAME = getClass().getSimpleName();
+    private static final String ARG_PARAM1 = "param1";
+    private final static ArrayList<TextView> arrayList = new ArrayList<>();
+    private OnFragmentInteractionListener mListener;
 
     public PageFragment() {
         Log.d(CLASS_NAME, "constructor start (empty)");
@@ -73,73 +72,6 @@ public class PageFragment extends Fragment {
             int param1 = getArguments().getInt(ARG_PARAM1);
         }
     }
-
-    final int TABPAGE_RUNNING_PROCESS = 0;
-    final int TABPAGE_INSTALLED_APPLICATION = 1;
-    /*
-    * argument : int page       0 origin
-    */
-    private void showList(View view, int page){
-        Log.d(CLASS_NAME, "showList() start");
-
-        Context context = this.getContext();
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
-
-        ArrayList<TextView> arrayList = new ArrayList<>();
-        switch (page) {
-            case TABPAGE_RUNNING_PROCESS:
-                if (null!=activityManager) {
-                    List<ActivityManager.RunningAppProcessInfo> runningApp = activityManager.getRunningAppProcesses();
-                    PackageManager packageManager = context.getPackageManager();
-                    Log.d(CLASS_NAME, "running appl count : " + runningApp.size());
-                    if (!runningApp.isEmpty()) {
-                        int i = 0;
-                        for (ActivityManager.RunningAppProcessInfo app : runningApp) {
-                            i++;
-                            try {
-
-                                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(app.processName, 0);
-                                Drawable applicationIcon = packageManager.getApplicationIcon(applicationInfo);
-                                //set application name.
-                                TextView textView = new TextView(context);
-                                String packageName = (String) packageManager.getApplicationLabel(applicationInfo);
-                                Log.d(CLASS_NAME, "packageNmae : " + packageName);
-                                textView.setText(packageName);
-                                //set icon.
-                                AtomicReference<Drawable> icon = new AtomicReference<>();
-                                icon.set(applicationIcon);
-                                //ICONの表示位置を設定 (引数：座標 x, 座標 y, 幅, 高さ)
-                                Log.d(CLASS_NAME, "size of icon (w/h) : "+icon.get().getIntrinsicWidth()+" / "+icon.get().getIntrinsicHeight());
-//iconサイズそのままだから・・・                                icon.get().setBounds(0, 0, icon.get().getIntrinsicWidth(), icon.get().getIntrinsicHeight());
-                                icon.get().setBounds(0, 0, 72, 72);
-                                //TextViewにアイコンセット（四辺(left, top, right, bottom)に対して別個にアイコンを描画できる）
-                                textView.setCompoundDrawables(icon.get(), null, null, null);
-                                //add new data to array.
-                                arrayList.add(textView);
-
-                            } catch (PackageManager.NameNotFoundException e) {
-                                e.printStackTrace();
-                                Log.d(CLASS_NAME,"exception of getapplicationinfo() : i="+i+
-                                                "processname="+app.processName+
-                                                " / "+
-                                                "importance="+app.importance
-                                );
-                            }
-                        }//for(app)
-                    }//if(!runningApp)
-                }
-                break;
-            case TABPAGE_INSTALLED_APPLICATION:
-                Log.d(CLASS_NAME, "page : " + page);
-                break;
-            default:
-                break;
-        }
-        ListViewAdapter mListViewAdapter = new ListViewAdapter( getContext(), R.layout.page_row, R.id.list_row_text ,arrayList );
-        ListView listView = view.findViewById( R.id.process_list );
-        listView.setAdapter( mListViewAdapter );
-        mListViewAdapter.notifyDataSetChanged(); //listViewに通知
-    }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -147,10 +79,81 @@ public class PageFragment extends Fragment {
         // Inflate the layout for this fragment
         int page = getArguments().getInt(ARG_PARAM1, 0);
         View view = inflater.inflate(R.layout.fragment_page, container, false);
-
         showList(view, page); //tabのデータを表示
-
         return view;
+    }
+
+    final int TABPAGE_RUNNING_PROCESS = 0;
+    final int TABPAGE_INSTALLED_APPLICATION = 1;
+    /*
+    * argument : int page       0 origin
+    */
+    private void showList(View view, int page){
+        Log.d(CLASS_NAME, "showList() start. page :"+page);
+        if (page==TABPAGE_RUNNING_PROCESS) {
+            setRunningProcess();
+        } else if (page==TABPAGE_INSTALLED_APPLICATION){
+            setInstalledApp();
+        } else {
+            Log.d(CLASS_NAME, "page number is illegal.");
+        }//if(page)
+        ListViewAdapter mListViewAdapter = new ListViewAdapter( getContext(), R.layout.page_row, R.id.list_row_text ,arrayList );
+        ListView listView = view.findViewById( R.id.process_list );
+        listView.setAdapter( mListViewAdapter );
+        mListViewAdapter.notifyDataSetChanged(); //listViewに通知
+    }
+    private void setRunningProcess() {
+        Log.d(CLASS_NAME, "setRunningProcess() start");
+        Context context = this.getContext();
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+
+        if (null!=activityManager) {
+            List<ActivityManager.RunningAppProcessInfo> runningApp = activityManager.getRunningAppProcesses();
+            PackageManager packageManager = context.getPackageManager();
+            Log.d(CLASS_NAME, "running appl count : " + runningApp.size());
+            if (!runningApp.isEmpty()) {
+                int i = 0;
+                for (ActivityManager.RunningAppProcessInfo app : runningApp) {
+                    i++;
+                    try {
+
+                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(app.processName, 0);
+                        Drawable applicationIcon = packageManager.getApplicationIcon(applicationInfo);
+                        //set application name.
+                        TextView textView = new TextView(context);
+                        String packageName = i+") "+(String) packageManager.getApplicationLabel(applicationInfo);
+                        textView.setText(packageName);
+                        //set icon.
+                        AtomicReference<Drawable> icon = new AtomicReference<>();
+                        icon.set(applicationIcon);
+                        //ICONの表示位置を設定 (引数：座標 x, 座標 y, 幅, 高さ)
+//                                Log.d(CLASS_NAME, "size of icon (w/h) : "+icon.get().getIntrinsicWidth()+" / "+icon.get().getIntrinsicHeight());
+//iconサイズそのままだから・・・                                icon.get().setBounds(0, 0, icon.get().getIntrinsicWidth(), icon.get().getIntrinsicHeight());
+                        icon.get().setBounds(0, 0, 72, 72);
+                        //TextViewにアイコンセット（四辺(left, top, right, bottom)に対して別個にアイコンを描画できる）
+                        textView.setCompoundDrawables(icon.get(), null, null, null);
+                        //add new data to array.
+                        arrayList.add(textView);
+
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                        Log.d(CLASS_NAME,"exception of getapplicationinfo() : i="+i+
+                                "processname="+app.processName+
+                                " / "+
+                                "importance="+app.importance
+                        );
+                    }
+                }//for(app)
+            }//if(!runningApp)
+        }
+    }
+    private void setInstalledApp() {
+        Log.d(CLASS_NAME, "setInstalledApp() start");
+        Context context = this.getContext();
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+        if (null!=activityManager) {
+            Log.d(CLASS_NAME, "running appl count : " );//+ runningApp.size());
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
