@@ -1,29 +1,25 @@
 package com.example.user.myproject;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static android.content.Context.ACTIVITY_SERVICE;
-import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 
 
 /**
@@ -85,41 +81,61 @@ public class PageFragment extends Fragment {
     private void showList(View view, int page){
         Log.d(CLASS_NAME, "showList() start");
 
-        ArrayList<String> arrayList = new ArrayList<>();
-
         Context context = this.getContext();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
+
+        ArrayList<TextView> arrayList = new ArrayList<>();
         switch (page) {
             case TABPAGE_RUNNING_PROCESS:
-                List<ActivityManager.RunningAppProcessInfo> runningApp = activityManager.getRunningAppProcesses();
-                PackageManager packageManager = (PackageManager) context.getPackageManager();
-                Log.d(CLASS_NAME, "running appl count : "+runningApp.size());
-                if( ! runningApp.isEmpty() ) {
-                    int i=0;
-                    for(ActivityManager.RunningAppProcessInfo app : runningApp) {
-                        i++;
-                        try {
-                            // アプリ名をリストに追加
-                            ApplicationInfo appInfo = packageManager.getApplicationInfo(app.processName, INSTALL_REASON_UNKNOWN);
-                            arrayList.add( i+") "+(String)packageManager.getApplicationLabel(appInfo) );
-                        } catch(PackageManager.NameNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                if (null!=activityManager) {
+                    List<ActivityManager.RunningAppProcessInfo> runningApp = activityManager.getRunningAppProcesses();
+                    PackageManager packageManager = context.getPackageManager();
+                    Log.d(CLASS_NAME, "running appl count : " + runningApp.size());
+                    if (!runningApp.isEmpty()) {
+                        int i = 0;
+                        for (ActivityManager.RunningAppProcessInfo app : runningApp) {
+                            i++;
+                            try {
+
+                                ApplicationInfo applicationInfo = packageManager.getApplicationInfo(app.processName, 0);
+                                Drawable applicationIcon = packageManager.getApplicationIcon(applicationInfo);
+                                //set application name.
+                                TextView textView = new TextView(context);
+                                String packageName = (String) packageManager.getApplicationLabel(applicationInfo);
+                                Log.d(CLASS_NAME, "packageNmae : " + packageName);
+                                textView.setText(packageName);
+                                //set icon.
+                                AtomicReference<Drawable> icon = new AtomicReference<Drawable>();
+                                icon.set(applicationIcon);
+                                //ICONの表示位置を設定 (引数：座標 x, 座標 y, 幅, 高さ)
+                                icon.get().setBounds(0, 0, icon.get().getIntrinsicWidth(), icon.get().getIntrinsicHeight());
+                                //TextViewにアイコンセット（四辺(left, top, right, bottom)に対して別個にアイコンを描画できる）
+                                textView.setCompoundDrawables(icon.get(), null, null, null);
+                                //add new data to array.
+                                arrayList.add(textView);
+
+                            } catch (PackageManager.NameNotFoundException e) {
+                                e.printStackTrace();
+                                Log.d(CLASS_NAME,"exception of getapplicationinfo() : i="+i+
+                                                "processname="+app.processName+
+                                                " / "+
+                                                "importance="+app.importance
+                                );
+                            }
+                        }//for(app)
+                    }//if(!runningApp)
                 }
                 break;
             case TABPAGE_INSTALLED_APPLICATION:
-                arrayList.add("44444");
-                arrayList.add("55555");
+                Log.d(CLASS_NAME, "page : " + page);
                 break;
             default:
                 break;
         }
-        ArrayAdapter<String> mAdapterOfList = new ArrayAdapter<>(getContext(), R.layout.page_low, R.id.list_row_text ,arrayList);
-//違いがいまいち判らない。↑        ArrayAdapter<String> mAdapterOfList = new ArrayAdapter<>(getContext(), R.layout.page_low);
-        ListView listView = view.findViewById(R.id.process_list);
-        listView.setAdapter(mAdapterOfList);
-        mAdapterOfList.notifyDataSetChanged(); //listViewに通知
+        ListViewAdapter mListViewAdapter = new ListViewAdapter( getContext(), R.layout.page_row, R.id.list_row_text ,arrayList );
+        ListView listView = view.findViewById( R.id.process_list );
+        listView.setAdapter( mListViewAdapter );
+        mListViewAdapter.notifyDataSetChanged(); //listViewに通知
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
