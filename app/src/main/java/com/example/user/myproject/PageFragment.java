@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -41,11 +42,16 @@ public class PageFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private final String CLASS_NAME = getClass().getSimpleName();
     private static final String ARG_PARAM1 = "param1";
-    private final static ArrayList<TextView> arrayList = new ArrayList<>();
+    private ListView mListView;
+    private ArrayList<TextView> mArrayList;
+    private ListViewAdapter mListViewAdapter;
     private OnFragmentInteractionListener mListener;
 
     public PageFragment() {
         Log.d(CLASS_NAME, "constructor start (empty)");
+        mListViewAdapter = null;
+        mListView = null;
+        mArrayList = new ArrayList<>();
     }
 
     /**
@@ -56,7 +62,7 @@ public class PageFragment extends Fragment {
      */
     // TODO: Rename and change types and number of parameters
     public static PageFragment newInstance(int page) {
-        Log.d("newInstance()", "PageFragment page="+page);
+        Log.d("newInstance()", "PageFragment page=" + page);
         PageFragment fragment = new PageFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_PARAM1, page);
@@ -72,42 +78,83 @@ public class PageFragment extends Fragment {
             int param1 = getArguments().getInt(ARG_PARAM1);
         }
     }
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(CLASS_NAME, "onCreateView() start");
         // Inflate the layout for this fragment
         int page = getArguments().getInt(ARG_PARAM1, 0);
         View view = inflater.inflate(R.layout.fragment_page, container, false);
+
         showList(view, page); //tabのデータを表示
+
+        setListViewListener();
+
         return view;
     }
 
-    final int TABPAGE_RUNNING_PROCESS = 0;
-    final int TABPAGE_INSTALLED_APPLICATION = 1;
+    private void setListViewListener() {
+        //set listener.
+        mListView.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.d(CLASS_NAME, "onItemSelected()");
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        } );
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.d(CLASS_NAME, "onItemClick()");
+            }
+        });
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            //Long touch すると onItemClick() も発生する。
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Log.d(CLASS_NAME, "onItemLongClick()");
+                return false;
+            }
+        });
+    }
+
+    final static int TABPAGE_RUNNING_PROCESS = 0;
+    final static int TABPAGE_INSTALLED_APPLICATION = 1;
+
     /*
     * argument : int page       0 origin
     */
-    private void showList(View view, int page){
-        Log.d(CLASS_NAME, "showList() start. page :"+page);
-        if (page==TABPAGE_RUNNING_PROCESS) {
+    private void showList(View view, int page) {
+        Log.d(CLASS_NAME, "showList() start. page :" + page);
+        if (page == TABPAGE_RUNNING_PROCESS) {
             setRunningProcess();
-        } else if (page==TABPAGE_INSTALLED_APPLICATION){
+        } else if (page == TABPAGE_INSTALLED_APPLICATION) {
             setInstalledApp();
         } else {
             Log.d(CLASS_NAME, "page number is illegal.");
         }//if(page)
-        ListViewAdapter mListViewAdapter = new ListViewAdapter( getContext(), R.layout.page_row, R.id.list_row_text ,arrayList );
-        ListView listView = view.findViewById( R.id.process_list );
-        listView.setAdapter( mListViewAdapter );
+        if (null != mListViewAdapter) {
+            mListViewAdapter.clear();
+        } else {
+            mListViewAdapter = new ListViewAdapter(getContext(), R.layout.page_row, R.id.list_row_text, mArrayList);
+        }
+        if (null==mListView) {
+            Log.d(CLASS_NAME, "mListView is null. (2)");
+            mListView = view.findViewById(R.id.process_list);
+        }
+        mListView.setAdapter(mListViewAdapter);
         mListViewAdapter.notifyDataSetChanged(); //listViewに通知
     }
+
     private void setRunningProcess() {
         Log.d(CLASS_NAME, "setRunningProcess() start");
         Context context = this.getContext();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
-
-        if (null!=activityManager) {
+        if (null != activityManager) {
             List<ActivityManager.RunningAppProcessInfo> runningApp = activityManager.getRunningAppProcesses();
             PackageManager packageManager = context.getPackageManager();
             Log.d(CLASS_NAME, "running appl count : " + runningApp.size());
@@ -121,7 +168,7 @@ public class PageFragment extends Fragment {
                         Drawable applicationIcon = packageManager.getApplicationIcon(applicationInfo);
                         //set application name.
                         TextView textView = new TextView(context);
-                        String packageName = i+") "+(String) packageManager.getApplicationLabel(applicationInfo);
+                        String packageName = i + ") " + (String) packageManager.getApplicationLabel(applicationInfo);
                         textView.setText(packageName);
                         //set icon.
                         AtomicReference<Drawable> icon = new AtomicReference<>();
@@ -133,26 +180,23 @@ public class PageFragment extends Fragment {
                         //TextViewにアイコンセット（四辺(left, top, right, bottom)に対して別個にアイコンを描画できる）
                         textView.setCompoundDrawables(icon.get(), null, null, null);
                         //add new data to array.
-                        arrayList.add(textView);
+                        mArrayList.add(textView);
 
                     } catch (PackageManager.NameNotFoundException e) {
                         e.printStackTrace();
-                        Log.d(CLASS_NAME,"exception of getapplicationinfo() : i="+i+
-                                "processname="+app.processName+
-                                " / "+
-                                "importance="+app.importance
-                        );
+                        Log.d(CLASS_NAME, "exception of getapplicationinfo() : i=" + i + "processname=" + app.processName + " / " + "importance=" + app.importance);
                     }
                 }//for(app)
             }//if(!runningApp)
         }
     }
+
     private void setInstalledApp() {
         Log.d(CLASS_NAME, "setInstalledApp() start");
         Context context = this.getContext();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
-        if (null!=activityManager) {
-            Log.d(CLASS_NAME, "running appl count : " );//+ runningApp.size());
+        if (null != activityManager) {
+            Log.d(CLASS_NAME, "running appl count : ");//+ runningApp.size());
         }
     }
 
@@ -164,7 +208,7 @@ public class PageFragment extends Fragment {
         }
     }
 
-//    @Override
+    //    @Override
 //    public void onAttach(Activity activity) {
 //        Log.d(CLASS_NAME, "onAttach(activity) start");
 //        super.onAttach(activity);
@@ -185,8 +229,7 @@ public class PageFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
         }
     }
 
