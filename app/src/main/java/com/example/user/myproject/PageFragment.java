@@ -1,6 +1,7 @@
 package com.example.user.myproject;
 
 import android.app.ActivityManager;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -8,7 +9,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +45,7 @@ public class PageFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private final String CLASS_NAME = getClass().getSimpleName();
-    private static final String ARG_PARAM1 = "param1";
+    protected static final String ARG_PARAM1 = "param1";
     private ListView mListView;
     private ArrayList<TextView> mArrayList;
     private ListViewAdapter mListViewAdapter;
@@ -81,31 +85,21 @@ public class PageFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(CLASS_NAME, "onCreateView() start");
+        Log.d(CLASS_NAME, "onCreateView() start. savedInstanceState->"+savedInstanceState);
         // Inflate the layout for this fragment
-        int page = getArguments().getInt(ARG_PARAM1, 0);
-        View view = inflater.inflate(R.layout.fragment_page, container, false);
+        if (null!=savedInstanceState) {
+            int page = getArguments().getInt(ARG_PARAM1, 0);
+        }
+        View view = inflater.inflate(R.layout.fragment_page, null, true);
 
-        showList(view, page); //tabのデータを表示
-
-        setListViewListener();
+        showList(view, 0); //tabのデータを表示
+//        setListViewListener(); //listener登録
 
         return view;
     }
 
     private void setListViewListener() {
         //set listener.
-        mListView.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.d(CLASS_NAME, "onItemSelected()");
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        } );
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
