@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/fragment_1"
-        android:name="com.example.user.myproject.PageFragment"
+        android:name="com.example.user.myproject.PageFragment_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

@@ -1,7 +1,6 @@
 package com.example.user.myproject;
 
 import android.app.ActivityManager;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -9,10 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,16 +27,16 @@ import static android.content.Context.ACTIVITY_SERVICE;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link PageFragment.OnFragmentInteractionListener} interface
+ * {@link PageFragment_2.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link PageFragment#newInstance} factory method to
+ * Use the {@link PageFragment_2#newInstance} factory method to
  * create an instance of this fragment.
  */
 
 //initial create by android studio.
 // select [file]->[new]->[fragment]->[blank fragment]
 
-public class PageFragment extends Fragment {
+public class PageFragment_2 extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -51,7 +47,7 @@ public class PageFragment extends Fragment {
     private ListViewAdapter mListViewAdapter;
     private OnFragmentInteractionListener mListener;
 
-    public PageFragment() {
+    public PageFragment_2() {
         Log.d(CLASS_NAME, "constructor start (empty)");
         mListViewAdapter = null;
         mListView = null;
@@ -62,12 +58,12 @@ public class PageFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment PageFragment.
+     * @return A new instance of fragment PageFragment_1.
      */
     // TODO: Rename and change types and number of parameters
-    public static PageFragment newInstance(int page) {
-        Log.d("newInstance()", "PageFragment page=" + page);
-        PageFragment fragment = new PageFragment();
+    public static PageFragment_2 newInstance(int page) {
+        Log.d("newInstance()", "PageFragment_1 page=" + page);
+        PageFragment_2 fragment = new PageFragment_2();
         Bundle args = new Bundle();
         args.putInt(ARG_PARAM1, page);
         fragment.setArguments(args);
@@ -76,7 +72,7 @@ public class PageFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(CLASS_NAME, "onCreate() start");
+        Log.d(CLASS_NAME, "onCreate() start. savedInstanceState->"+savedInstanceState);
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             int param1 = getArguments().getInt(ARG_PARAM1);
@@ -92,8 +88,8 @@ public class PageFragment extends Fragment {
         }
         View view = inflater.inflate(R.layout.fragment_page, null, true);
 
-        showList(view, 0); //tabのデータを表示
-//        setListViewListener(); //listener登録
+        showList( view ); //tabのデータを表示
+        setListViewListener(); //listener登録
 
         return view;
     }
@@ -116,21 +112,12 @@ public class PageFragment extends Fragment {
         });
     }
 
-    final static int TABPAGE_RUNNING_PROCESS = 0;
-    final static int TABPAGE_INSTALLED_APPLICATION = 1;
-
     /*
     * argument : int page       0 origin
     */
-    private void showList(View view, int page) {
-        Log.d(CLASS_NAME, "showList() start. page :" + page);
-        if (page == TABPAGE_RUNNING_PROCESS) {
-            setRunningProcess();
-        } else if (page == TABPAGE_INSTALLED_APPLICATION) {
-            setInstalledApp();
-        } else {
-            Log.d(CLASS_NAME, "page number is illegal.");
-        }//if(page)
+    private void showList( View view ) {
+        Log.d(CLASS_NAME, "showList() start.");
+        setInstalledApp();
         if (null != mListViewAdapter) {
             mListViewAdapter.clear();
         } else {
@@ -142,47 +129,6 @@ public class PageFragment extends Fragment {
         }
         mListView.setAdapter(mListViewAdapter);
         mListViewAdapter.notifyDataSetChanged(); //listViewに通知
-    }
-
-    private void setRunningProcess() {
-        Log.d(CLASS_NAME, "setRunningProcess() start");
-        Context context = this.getContext();
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
-        if (null != activityManager) {
-            List<ActivityManager.RunningAppProcessInfo> runningApp = activityManager.getRunningAppProcesses();
-            PackageManager packageManager = context.getPackageManager();
-            Log.d(CLASS_NAME, "running appl count : " + runningApp.size());
-            if (!runningApp.isEmpty()) {
-                int i = 0;
-                for (ActivityManager.RunningAppProcessInfo app : runningApp) {
-                    i++;
-                    try {
-
-                        ApplicationInfo applicationInfo = packageManager.getApplicationInfo(app.processName, 0);
-                        Drawable applicationIcon = packageManager.getApplicationIcon(applicationInfo);
-                        //set application name.
-                        TextView textView = new TextView(context);
-                        String packageName = i + ") " + (String) packageManager.getApplicationLabel(applicationInfo);
-                        textView.setText(packageName);
-                        //set icon.
-                        AtomicReference<Drawable> icon = new AtomicReference<>();
-                        icon.set(applicationIcon);
-                        //ICONの表示位置を設定 (引数：座標 x, 座標 y, 幅, 高さ)
-//                                Log.d(CLASS_NAME, "size of icon (w/h) : "+icon.get().getIntrinsicWidth()+" / "+icon.get().getIntrinsicHeight());
-//iconサイズそのままだから・・・                                icon.get().setBounds(0, 0, icon.get().getIntrinsicWidth(), icon.get().getIntrinsicHeight());
-                        icon.get().setBounds(0, 0, 72, 72);
-                        //TextViewにアイコンセット（四辺(left, top, right, bottom)に対して別個にアイコンを描画できる）
-                        textView.setCompoundDrawables(icon.get(), null, null, null);
-                        //add new data to array.
-                        mArrayList.add(textView);
-
-                    } catch (PackageManager.NameNotFoundException e) {
-                        e.printStackTrace();
-                        Log.d(CLASS_NAME, "exception of getapplicationinfo() : i=" + i + "processname=" + app.processName + " / " + "importance=" + app.importance);
-                    }
-                }//for(app)
-            }//if(!runningApp)
-        }
     }
 
     private void setInstalledApp() {
@@ -202,7 +148,7 @@ public class PageFragment extends Fragment {
         }
     }
 
-    //    @Override
+//    @Override
 //    public void onAttach(Activity activity) {
 //        Log.d(CLASS_NAME, "onAttach(activity) start");
 //        super.onAttach(activity);
@@ -214,6 +160,7 @@ public class PageFragment extends Fragment {
 //                    + " must implement OnListFragmentInteractionListener");
 //        }
 //    }
+
     @Override
     public void onAttach(Context context) {
         //API23（Android 6）からこの仕様に変わったらしい。
