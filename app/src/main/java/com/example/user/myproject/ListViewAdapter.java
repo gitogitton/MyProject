@@ -33,16 +33,16 @@ public class ListViewAdapter extends ArrayAdapter<TextView> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View view;
+        View mView;
 
         if (null!=convertView) {
-            view = convertView;
+            mView = convertView;
         } else {
-            view = mInflater.inflate(R.layout.page_row, parent, false);
+            mView = mInflater.inflate(R.layout.page_row, parent, false);
         }
 
         //set text and icon on TextView
-        TextView textView = view.findViewById(R.id.list_row_text); //layoutのコントロールＩＤを取得
+        TextView textView = mView.findViewById(R.id.list_row_text); //layoutのコントロールＩＤを取得
         if (null!=textView) {
             //icon
             Drawable[] applicationIcon = getItem(position).getCompoundDrawables();
@@ -56,6 +56,6 @@ public class ListViewAdapter extends ArrayAdapter<TextView> {
             Log.d(CLASS_NAME, "textView is null at getView().");
         }//if(textView)
 
-        return view;
+        return mView;
     }
 }

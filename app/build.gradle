@@ -16,6 +16,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    // Specifies two flavor dimensions.
+    flavorDimensions "fd1"
+
+    productFlavors {
+        master {
+            dimension "fd1"
+            applicationId "com.example.user.myproject.master"
+        }
+        learn {
+            dimension "fd1"
+            applicationId "com.example.user.myproject.learn"
+        }
+    }
 }
 
 dependencies {

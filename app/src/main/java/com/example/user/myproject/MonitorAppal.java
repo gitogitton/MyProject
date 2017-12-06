@@ -10,11 +10,12 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 public class MonitorAppal extends AppCompatActivity
-        implements ViewPager.OnPageChangeListener, PageFragment_1.OnFragmentInteractionListener, PageFragment_2.OnFragmentInteractionListener {
+        implements ViewPager.OnPageChangeListener,
+                        PageFragment_1.OnFragmentInteractionListener, PageFragment_2.OnFragmentInteractionListener {
 
     private final String CLASS_NAME = getClass().getSimpleName();
 
-    android.support.v4.app.FragmentManager mFragmentManager;
+    private android.support.v4.app.FragmentManager mFragmentManager;
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     public CustomPagerAdapter mFragmentPagerAdapter;
@@ -31,20 +32,6 @@ public class MonitorAppal extends AppCompatActivity
         setToolbar();
         setTab();
         setViewPager();
-
-        //https://qiita.com/teradonburi/items/24f25a7c6590c8acad71
-        if ( null==savedInstanceState ) {
-            mFragmentManager = getSupportFragmentManager();
-            PageFragment_1 pageFragment = new PageFragment_1();
-            Bundle bundle = new Bundle();
-            bundle.putInt(PageFragment_1.ARG_PARAM1, 0);
-
-            pageFragment.setArguments(bundle);
-            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-            fragmentTransaction.add(R.id.view_pager, pageFragment);
-            fragmentTransaction.commit();
-            mFragmentManager.executePendingTransactions(); // FragmentのTransaction処理の完了同期待ち（必須ではない）
-        }
     }
 
     private void setToolbar() {
@@ -60,7 +47,8 @@ public class MonitorAppal extends AppCompatActivity
     private void setViewPager() {
         Log.d(CLASS_NAME, "setViewPager() start");
 
-        mFragmentPagerAdapter = new CustomPagerAdapter( getSupportFragmentManager() );
+        mFragmentManager = getSupportFragmentManager();
+        mFragmentPagerAdapter = new CustomPagerAdapter( mFragmentManager );
         mViewPager.setAdapter( mFragmentPagerAdapter );
         mViewPager.addOnPageChangeListener(this); //ページ切り替え、ページスクロール時に呼ばれるリスナー登録
     }

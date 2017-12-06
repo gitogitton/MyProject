@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
@@ -44,7 +45,8 @@ public class PageFragment_1 extends Fragment {
     private final String CLASS_NAME = getClass().getSimpleName();
     protected static final String ARG_PARAM1 = "param1";
 
-    private ListView mListView;
+    private View mView; //このview
+    private ListView mListView; //このviewにあるlistview
     private ArrayList<TextView> mArrayList;
     private ListViewAdapter mListViewAdapter;
 
@@ -89,12 +91,48 @@ public class PageFragment_1 extends Fragment {
         if (null!=savedInstanceState) {
             int page = getArguments().getInt(ARG_PARAM1, 0);
         }
-        View view = inflater.inflate(R.layout.fragment_page, null, true);
+        mView = inflater.inflate(R.layout.fragment_page, container, false);
 
-        showList( view ); //tabのデータを表示
+        return mView;
+    }
+
+//    /**
+//     * Called immediately after {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}
+//     * has returned, but before any saved state has been restored in to the view.
+//     * This gives subclasses a chance to initialize themselves once
+//     * they know their view hierarchy has been completely created.  The fragment's
+//     * view hierarchy is not however attached to its parent at this point.
+//     *
+//     * @param view               The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+//     * @param savedInstanceState If non-null, this fragment is being re-constructed
+//     */
+//    @Override
+//    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+//        super.onViewCreated(view, savedInstanceState);
+//        Log.d(CLASS_NAME, "onViewCreated() start.");
+//        showList();
+//        setListViewListener(); //listener登録
+//    }
+
+    /**
+     * Called when the fragment's activity has been created and this
+     * fragment's view hierarchy instantiated.  It can be used to do final
+     * initialization once these pieces are in place, such as retrieving
+     * views or restoring state.  It is also useful for fragments that use
+     * {@link #setRetainInstance(boolean)} to retain their instance,
+     * as this callback tells the fragment when it is fully associated with
+     * the new activity instance.  This is called after {@link #onCreateView}
+     * and before {@link #onViewStateRestored(Bundle)}.
+     *
+     * @param savedInstanceState If the fragment is being re-created from
+     *                           a previous saved state, this is the state.
+     */
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.d(CLASS_NAME, "onActivityCreated() start.");
+        showList();
         setListViewListener(); //listener登録
-
-        return view;
     }
 
     private void setListViewListener() {
@@ -118,18 +156,24 @@ public class PageFragment_1 extends Fragment {
     /*
     * argument : int page       0 origin
     */
-    private void showList( View view ) {
+    private void showList() {
         Log.d(CLASS_NAME, "showList() start.");
+
         setRunningProcess();
+
+        Log.d(CLASS_NAME, "mListViewAdapter->"+mListViewAdapter);
+        Log.d(CLASS_NAME, "mArrayList.size()->"+mArrayList.size());
+
         if (null != mListViewAdapter) {
             mListViewAdapter.clear();
         } else {
-            mListViewAdapter = new ListViewAdapter(getContext(), R.layout.page_row, R.id.list_row_text, mArrayList);
+            mListViewAdapter = new ListViewAdapter(this.getContext(), R.layout.page_row, R.id.list_row_text, mArrayList);
         }
         if (null==mListView) {
             Log.d(CLASS_NAME, "mListView is null. (2)");
-            mListView = view.findViewById(R.id.process_list);
+            mListView = mView.findViewById(R.id.process_list);
         }
+        Log.d(CLASS_NAME, "mListViewAdapter.getCount()->"+mListViewAdapter.getCount());
         mListView.setAdapter(mListViewAdapter);
         mListViewAdapter.notifyDataSetChanged(); //listViewに通知
     }
@@ -144,16 +188,17 @@ public class PageFragment_1 extends Fragment {
             Log.d(CLASS_NAME, "running appl count : " + runningApp.size());
             if (!runningApp.isEmpty()) {
                 int i = 0;
+                mArrayList.clear();
                 for (ActivityManager.RunningAppProcessInfo app : runningApp) {
                     i++;
                     try {
-
                         ApplicationInfo applicationInfo = packageManager.getApplicationInfo(app.processName, 0);
                         Drawable applicationIcon = packageManager.getApplicationIcon(applicationInfo);
                         //set application name.
                         TextView textView = new TextView(context);
                         String packageName = i + ") " + (String) packageManager.getApplicationLabel(applicationInfo);
                         textView.setText(packageName);
+                        //Log.d(CLASS_NAME, "package name -> "+packageName);
                         //set icon.
                         AtomicReference<Drawable> icon = new AtomicReference<>();
                         icon.set(applicationIcon);
@@ -165,7 +210,6 @@ public class PageFragment_1 extends Fragment {
                         textView.setCompoundDrawables(icon.get(), null, null, null);
                         //add new data to array.
                         mArrayList.add(textView);
-
                     } catch (PackageManager.NameNotFoundException e) {
                         e.printStackTrace();
                         Log.d(CLASS_NAME, "exception of getapplicationinfo() : i=" + i + "processname=" + app.processName + " / " + "importance=" + app.importance);

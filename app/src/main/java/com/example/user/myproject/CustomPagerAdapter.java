@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,8 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
     final static int TABPAGE_INSTALLED_APPLICATION = 1;
 
     private final String CLASS_NAME =getClass().getSimpleName();
+    private PageFragment_1 mPage1;
+    private PageFragment_2 mPage2;
 
     public CustomPagerAdapter(FragmentManager fm) {
         super(fm);
@@ -67,31 +70,46 @@ public class CustomPagerAdapter extends FragmentPagerAdapter {
         Log.d(CLASS_NAME, "FragmentPagerAdapter.getItem() start. position=" + position);
         switch (position) {
             case TABPAGE_RUNNING_PROCESS :
-                return PageFragment_1.newInstance(position);
-            case TABPAGE_INSTALLED_APPLICATION:
-                return PageFragment_2.newInstance(position);
+                return mPage1 = PageFragment_1.newInstance( TABPAGE_RUNNING_PROCESS );
+            case TABPAGE_INSTALLED_APPLICATION :
+                return mPage2 = PageFragment_2.newInstance( TABPAGE_INSTALLED_APPLICATION );
             default:
-                return PageFragment_1.newInstance( 0 );
+                Log.d(CLASS_NAME, "illegal argument. (position)");
+                return null;
         }
     }
 
-    /**
-     * Create the page for the given position.  The adapter is responsible
-     * for adding the view to the container given here, although it only
-     * must ensure this is done by the time it returns from
-     * {@link #finishUpdate(ViewGroup)}.
-     *
-     * @param container The containing View in which the page will be shown.
-     * @param position  The page position to be instantiated.
-     * @return Returns an Object representing the new page.  This does not
-     * need to be a View, but can be some other container of the page.
-     */
-    @NonNull
-    @Override
-    public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        Log.d(CLASS_NAME, "getCount() start. position->"+position);
-        return super.instantiateItem(container, position);
-    }
+//    /**
+//     * Create the page for the given position.  The adapter is responsible
+//     * for adding the view to the container given here, although it only
+//     * must ensure this is done by the time it returns from
+//     * {@link #finishUpdate(ViewGroup)}.
+//     *
+//     * @param container The containing View in which the page will be shown.
+//     * @param position  The page position to be instantiated.
+//     * @return Returns an Object representing the new page.  This does not
+//     * need to be a View, but can be some other container of the page.
+//     */
+//    @NonNull
+//    @Override
+//    public Object instantiateItem(@NonNull ViewGroup container, int position) {
+//        Log.d(CLASS_NAME, "instantiateItem() start. position->"+position);
+////        return super.instantiateItem(container, position);
+//
+//        switch ( position ) {
+//            case TABPAGE_RUNNING_PROCESS :
+//                //mPage1;
+//                mPage1 = new PageFragment_1();
+//                return mPage1;
+//            case TABPAGE_INSTALLED_APPLICATION :
+//                //mPage2;
+//                mPage2 = new PageFragment_2();
+//                return mPage1;
+//            default :
+//                break;
+//        }
+//        return null;
+//    }
 
     /**
      * Determines whether a page View is associated with a specific key object

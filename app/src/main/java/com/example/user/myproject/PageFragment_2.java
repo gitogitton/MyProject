@@ -62,7 +62,7 @@ public class PageFragment_2 extends Fragment {
      */
     // TODO: Rename and change types and number of parameters
     public static PageFragment_2 newInstance(int page) {
-        Log.d("newInstance()", "PageFragment_1 page=" + page);
+        Log.d("newInstance()", "PageFragment_2 page=" + page);
         PageFragment_2 fragment = new PageFragment_2();
         Bundle args = new Bundle();
         args.putInt(ARG_PARAM1, page);
@@ -136,7 +136,7 @@ public class PageFragment_2 extends Fragment {
         Context context = this.getContext();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
         if (null != activityManager) {
-            Log.d(CLASS_NAME, "running appl count : ");//+ runningApp.size());
+            Log.d(CLASS_NAME, "installed appl count : ");//+ runningApp.size());
         }
     }
 
